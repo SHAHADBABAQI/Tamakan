@@ -7,18 +7,36 @@
 
 import SwiftUI
 
+import AVFoundation
+import SwiftUI
+
+
+
 struct ContentView: View {
+    @StateObject var audioVM = AudioRecordingViewModel()
+    @State var isRecording = false
+
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+            Button(isRecording ? "Stop" : "Start") {
+                if isRecording {
+                    audioVM.stopRecording()
+                } else {
+                    audioVM.startRecording()
+                }
+                isRecording.toggle()
+            }
+
+            Button("Play Recording") {
+                           audioVM.playRecording()
+                       }
         }
         .padding()
     }
-}
+}//struct
 
 #Preview {
     ContentView()
 }
+
+

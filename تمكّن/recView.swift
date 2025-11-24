@@ -21,6 +21,8 @@ struct recView: View {
     @State var size :CGFloat = 1
     @State var size1 :CGFloat = 1
     @State private var animationTimer: Timer?
+    @State private var showCancelAlert = false
+
        
     func startSizeLoop() {
         // Reset before starting
@@ -155,13 +157,23 @@ struct recView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         // handle cancel
+                        showCancelAlert = true
                     }
+                    
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("add text") {
                         // handle add text
                     }
                 }
+            }
+            .alert("Are you sure?", isPresented: $showCancelAlert) {
+                Button("Yes, Cancel", role: .destructive) {
+                    // cancel action
+                }
+                Button("No", role: .cancel) { }
+            } message: {
+                Text("If you cancel now, your progress will be lost.")
             }
         }
     }

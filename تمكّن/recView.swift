@@ -1,11 +1,4 @@
 //
-//  recView.swift
-//  تمكّن
-//
-//  Created by shahad khaled on 28/05/1447 AH.
-//
-
-//
 //  ContentView.swift
 //  تمكّن
 //
@@ -14,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import Combine
 
 struct recView: View {
     @StateObject var audioVM = AudioRecordingViewModel()
@@ -21,9 +15,22 @@ struct recView: View {
     @State var size :CGFloat = 1
     @State var size1 :CGFloat = 1
     @State private var animationTimer: Timer?
-    @State private var showCancelAlert = false
-
-       
+    @State private var time = 0.0
+    @State private var timer: Timer?
+    
+    
+    
+    func startTimer(){
+        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
+            time += 0.01
+        }
+    }
+    
+    func stopTimer() {
+        timer?.invalidate()
+        
+    }
+    
     func startSizeLoop() {
         // Reset before starting
         size = 1
@@ -114,9 +121,13 @@ struct recView: View {
                             if isRecording {
                                 audioVM.stopRecording()
                                 stopSizeLoop()
+                                stopTimer()
+                                
                             } else {
                                 audioVM.startRecording()
                                 startSizeLoop()
+                                startTimer()
+                               
                             }
                             isRecording.toggle()
                         } label: {
@@ -131,8 +142,14 @@ struct recView: View {
                     .offset(x: 0, y: 60)
                     .padding(.bottom, 8)
                     
-                    Text("00:12.50")
+                    let hours = Int(time) / 3600
+                    let minutes = (Int(time) % 3600) / 60
+                    let seconds = Int(time) % 60
+                    let milliseconds = Int((time.truncatingRemainder(dividingBy: 1)) * 100)
+                    
+                    Text(String(format : "%02d:%02d:%02d.%02d", hours, minutes, seconds, milliseconds, time))
                         .offset(x: 0, y: 55)
+                        .monospacedDigit()
                     
                     ZStack{
                         Text("Take a Breath")
@@ -157,23 +174,13 @@ struct recView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
                         // handle cancel
-                        showCancelAlert = true
                     }
-                    
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("add text") {
                         // handle add text
                     }
                 }
-            }
-            .alert("Are you sure?", isPresented: $showCancelAlert) {
-                Button("Yes, Cancel", role: .destructive) {
-                    // cancel action
-                }
-                Button("No", role: .cancel) { }
-            } message: {
-                Text("If you cancel now, your progress will be lost.")
             }
         }
     }

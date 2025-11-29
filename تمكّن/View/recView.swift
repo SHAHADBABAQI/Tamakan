@@ -12,47 +12,48 @@ import Combine
 struct recView: View {
     @StateObject var audioVM = AudioRecordingViewModel()
     @State var isRecording = false
-    @State var size :CGFloat = 1
-    @State var size1 :CGFloat = 1
-    @State private var animationTimer: Timer?
-    @State private var time = 0.0
-    @State private var timer: Timer?
+//    @State var size :CGFloat = 1
+//    @State var size1 :CGFloat = 1
+//    @State private var animationTimer: Timer?
+    @EnvironmentObject var recViewModel : RecViewModel
+//    @State private var time = 0.0
+//    @State private var timer: Timer?
     
     
     
-    func startTimer(){
-        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
-            time += 0.01
-        }
-    }
-    
-    func stopTimer() {
-        timer?.invalidate()
-        
-    }
-    
-    func startSizeLoop() {
-        // Reset before starting
-        size = 1
-        size1 = 1
-        
-        // Invalidate any old timer
-        animationTimer?.invalidate()
-        
-        // Make a timer that fires every 1 second
-        animationTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-            withAnimation(.easeInOut(duration: 0.8)) {
-                size = (size == 1) ? 1.2 : 1
-                size1 = (size1 == 1.3) ? 1 : 1.3
-            }
-        }
-    }
-
-    func stopSizeLoop() {
-        animationTimer?.invalidate()
-        animationTimer = nil
-        size = 1
-    }
+//    func startTimer(){
+//        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
+//            time += 0.01
+//        }
+//    }
+//    
+//    func stopTimer() {
+//        timer?.invalidate()
+//        
+//    }
+//    
+//    func startSizeLoop() {
+//        // Reset before starting
+//        size = 1
+//        size1 = 1
+//        
+//        // Invalidate any old timer
+//        animationTimer?.invalidate()
+//        
+//        // Make a timer that fires every 1 second
+//        animationTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+//            withAnimation(.easeInOut(duration: 0.8)) {
+//                size = (size == 1) ? 1.2 : 1
+//                size1 = (size1 == 1.3) ? 1 : 1.3
+//            }
+//        }
+//    }
+//
+//    func stopSizeLoop() {
+//        animationTimer?.invalidate()
+//        animationTimer = nil
+//        size = 1
+//    }
     
     
     var body: some View {
@@ -87,31 +88,31 @@ struct recView: View {
                             .blur(radius: 10)
                             .frame(width: 200, height: 200)
                             .foregroundStyle(Color.aud1)
-                            .scaleEffect(size)
+                            .scaleEffect(recViewModel.size)
 
                         Circle()
                             .blur(radius: 4)
                             .frame(width: 150, height: 150)
                             .foregroundStyle(Color.aud2)
-                            .scaleEffect(size1)
+                            .scaleEffect(recViewModel.size1)
 
                         Circle()
                             .blur(radius: 4)
                             .frame(width: 100, height: 100)
                             .foregroundStyle(Color.aud3)
-                            .scaleEffect(size)
+                            .scaleEffect(recViewModel.size)
 
                         Circle()
                             .blur(radius: 5)
                             .frame(width: 65, height: 65)
                             .foregroundStyle(Color.white)
-                            .scaleEffect(size1)
+                            .scaleEffect(recViewModel.size1)
                         
                         Circle()
                             .blur(radius: 5)
                             .frame(width: 50, height: 50)
                             .foregroundStyle(Color.black)
-                            .scaleEffect(size)
+                            .scaleEffect(recViewModel.size)
                         
                         Circle()
                             .frame(width: 50 , height: 50 )
@@ -120,13 +121,13 @@ struct recView: View {
                         Button {
                             if isRecording {
                                 audioVM.stopRecording()
-                                stopSizeLoop()
-                                stopTimer()
+                                recViewModel.stopSizeLoop()
+                                recViewModel.stopTimer()
                                 
                             } else {
                                 audioVM.startRecording()
-                                startSizeLoop()
-                                startTimer()
+                                recViewModel.startSizeLoop()
+                                recViewModel.startTimer()
                                
                             }
                             isRecording.toggle()
@@ -142,7 +143,7 @@ struct recView: View {
                     .offset(x: 0, y: 60)
                     .padding(.bottom, 8)
                     
-                    let hours = Int(time) / 3600
+                    let hours = Int(recViewModel.time) / 3600
                     let minutes = (Int(time) % 3600) / 60
                     let seconds = Int(time) % 60
                     let milliseconds = Int((time.truncatingRemainder(dividingBy: 1)) * 100)

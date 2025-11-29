@@ -13,47 +13,7 @@ struct recView: View {
     @EnvironmentObject var recViewModel: RecViewModel
     @StateObject var audioVM = AudioRecordingViewModel()
     @State var isRecording = false
-//    @State var size :CGFloat = 1
-//    @State var size1 :CGFloat = 1
-//    @State private var animationTimer: Timer?
-//    @State private var time = 0.0
-//    @State private var timer: Timer?
-    
-    
-    
-//    func startTimer(){
-//        timer = Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { _ in
-//            time += 0.01
-//        }
-//    }
-//    
-//    func stopTimer() {
-//        timer?.invalidate()
-//        
-//    }
-//    
-//    func startSizeLoop() {
-//        // Reset before starting
-//        size = 1
-//        size1 = 1
-//        
-//        // Invalidate any old timer
-//        animationTimer?.invalidate()
-//        
-//        // Make a timer that fires every 1 second
-//        animationTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-//            withAnimation(.easeInOut(duration: 0.8)) {
-//                size = (size == 1) ? 1.2 : 1
-//                size1 = (size1 == 1.3) ? 1 : 1.3
-//            }
-//        }
-//    }
-//
-//    func stopSizeLoop() {
-//        animationTimer?.invalidate()
-//        animationTimer = nil
-//        size = 1
-//    }
+
     
     
     var body: some View {

@@ -93,6 +93,7 @@ struct records: View {
                             Image("mic11")
                                 .frame(width: 80, height: 80)
                                 .padding(.bottom, -50)
+                                .padding(.trailing,-5)
                         }
                     }
                     .padding(.bottom, -30)

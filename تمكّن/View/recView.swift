@@ -41,10 +41,6 @@ struct recView: View {
                             .foregroundColor(.gray)
                         Text("and it's challenge three")
                             .font(.title)
-                        Button(action: {
-                                        audioVM.playRecording() 
-                        }) { Text("Play Recording") }
-                        
                     }
                     
                     ZStack{
@@ -130,6 +126,7 @@ struct recView: View {
                         .buttonStyle(.glass)
                         .offset(x: 125, y: 130)
                     }
+                    .navigationBarBackButtonHidden(true)
                 }
                 .ignoresSafeArea() // allow content to extend beyond the screen edges
             }
@@ -137,19 +134,20 @@ struct recView: View {
             .toolbarTitleDisplayMode(.inline) // correct API
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        // handle cancel
+                    NavigationLink(destination: records()) {
+                        Text("Cancel")
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("add text") {
-                        // handle add text
-                    }
+
                 }
+            .navigationBarBackButtonHidden(true) 
             }
+        .preferredColorScheme(.dark)
+
         }
+//        .preferredColorScheme(.dark)
     }
-}
+
 
 #Preview {
     recView()

@@ -19,7 +19,7 @@ struct records: View {
     ]
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 Color(.systemBackground)
                     .ignoresSafeArea()
@@ -89,7 +89,7 @@ struct records: View {
                             .cornerRadius(20)
                             .padding(.bottom, -15)
 
-                        NavigationLink(destination: SecondView()) {
+                        NavigationLink(destination: recView()) {
                             Image("mic11")
                                 .frame(width: 80, height: 80)
                                 .padding(.bottom, -50)
@@ -99,18 +99,12 @@ struct records: View {
                     .padding(.bottom, -30)
                 }
             }
-            .navigationBarHidden(true)
-        }
+            .navigationBarBackButtonHidden(true)   
+                .navigationBarHidden(true)             }
     }
+       
 }
 
-struct SecondView: View {
-    var body: some View {
-        Text("هذه الصفحة الثانية")
-            .font(.largeTitle)
-            .foregroundColor(.black)
-    }
-}
 
 struct Recording: Identifiable {
     let id: Int

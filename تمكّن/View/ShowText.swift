@@ -61,11 +61,8 @@ struct ShowText: View {
                     .foregroundColor(textColor)
                 
                 HStack {
-                    Button("حفظ") {
-                        print("Saved text:", text)
-                        dismiss()
-                    }
-                    .foregroundColor(textColor)
+                  
+                    
                     
                     Spacer()
                     

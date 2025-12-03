@@ -13,6 +13,8 @@ struct recView: View {
     @EnvironmentObject var recViewModel: RecViewModel
     @StateObject var audioVM = AudioRecordingViewModel()
     @State var isRecording = false
+    @Environment(\.dismiss) private var dismiss
+
 
     
     
@@ -85,19 +87,32 @@ struct recView: View {
                         
                         Button {
                             if isRecording {
+                                // 🔴 إيقاف التسجيل
                                 audioVM.stopRecording()
                                 recViewModel.stopSizeLoop()
                                 recViewModel.stopTimer()
-                                
+
+                                // ✅ نحفظ التسجيل في الـ ViewModel
+                                recViewModel.addCurrentRecording()
+
+                                // (اختياري) نفضّي الوقت والنص
+                                recViewModel.time = 0
+                                audioVM.finalText = ""
+
+                                // ✅ نرجع لصفحة التسجيلات
+                                dismiss()
+
                             } else {
+                                // 🟢 بدء التسجيل
                                 audioVM.startRecording()
                                 recViewModel.startSizeLoop()
                                 recViewModel.startTimer()
-                               
                             }
+
                             isRecording.toggle()
+
                         } label: {
-                            Image(isRecording ? "Mic4" : "Mic")   // changes image while recording
+                            Image(isRecording ? "Mic4" : "Mic")
                                 .frame(width: 60, height: 60)
                                 .padding()
                         }

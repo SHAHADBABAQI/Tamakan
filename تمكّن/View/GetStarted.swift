@@ -39,19 +39,19 @@ struct GetStarted: View {
                     Spacer()
 
                     VStack(spacing: 8) {
-                        Text("تحدّث")
+                        Text("Speak")
                             .font(.system(size: 42, weight: .bold))
                             .foregroundColor(.primary)     // ← يتغير تلقائيًا
                             .opacity(showFirst ? 1 : 0)
                             .offset(y: showFirst ? 0 : 10)
 
-                        Text("تدرّب")
+                        Text("Practice")
                             .font(.system(size: 42, weight: .bold))
                             .foregroundColor(.primary)
                             .opacity(showSecond ? 1 : 0)
                             .offset(y: showSecond ? 0 : 10)
 
-                        Text("تطوّر")
+                        Text("Improve")
                             .font(.system(size: 42, weight: .bold))
                             .foregroundColor(.primary)
                             .opacity(showThird ? 1 : 0)
@@ -64,7 +64,7 @@ struct GetStarted: View {
                     NavigationLink {
                         records()
                     } label: {
-                        Text("إبدأ")
+                        Text("Get Started")
                             .font(.system(size: 22, weight: .medium))
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity)

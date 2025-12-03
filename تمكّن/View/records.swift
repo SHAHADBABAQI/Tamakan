@@ -8,21 +8,28 @@
 import SwiftUI
 
 struct records: View {
+    @EnvironmentObject var recViewModel: RecViewModel   // 👈 ناخذ التسجيلات من هنا
     @State private var searchText = ""
     @State private var expandedID: Int? = nil
 
-    let recordings = [
-        Recording(id: 1, title: "تسجيل جديد 01", date: "17 نوفمبر 2025", duration: "1:01"),
-        Recording(id: 2, title: "تسجيل جديد 02", date: "17 نوفمبر 2025", duration: "1:10"),
-        Recording(id: 3, title: "تسجيل جديد 03", date: "17 نوفمبر 2025", duration: "1:10"),
-        Recording(id: 4, title: "تسجيل جديد 04", date: "17 نوفمبر 2025", duration: "1:10")
-    ]
+    // فلترة حسب البحث
+    var filteredRecordings: [Recording] {
+        if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return recViewModel.recordings
+        } else {
+            return recViewModel.recordings.filter { rec in
+                rec.title.contains(searchText)
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
             ZStack {
                 Color(.systemBackground)
                     .ignoresSafeArea()
+
+                // الخلفية العلوية
                 VStack {
                     HStack {
                         Image("Image1")
@@ -35,6 +42,7 @@ struct records: View {
                     Spacer()
                 }
 
+                // المحتوى الرئيسي
                 VStack(alignment: .trailing, spacing: 20) {
                     Spacer()
 
@@ -54,7 +62,7 @@ struct records: View {
 
                     ScrollView {
                         VStack(spacing: 18) {
-                            ForEach(recordings) { rec in
+                            ForEach(filteredRecordings) { rec in
                                 RecordingCard(
                                     id: rec.id,
                                     title: rec.title,
@@ -62,7 +70,8 @@ struct records: View {
                                     duration: rec.duration,
                                     isExpanded: expandedID == rec.id
                                 ) {
-                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                                    withAnimation(.spring(response: 0.35,
+                                                          dampingFraction: 0.75)) {
                                         expandedID = (expandedID == rec.id ? nil : rec.id)
                                     }
                                 }
@@ -73,6 +82,7 @@ struct records: View {
                     }
                 }
 
+                // زر المايك تحت
                 VStack {
                     Spacer()
 
@@ -89,7 +99,7 @@ struct records: View {
                             .cornerRadius(20)
                             .padding(.bottom, -15)
 
-                        NavigationLink(destination: recView()) {
+                        NavigationLink(destination: recView().environmentObject(recViewModel)) {
                             Image("mic11")
                                 .frame(width: 80, height: 80)
                                 .padding(.bottom, -50)
@@ -99,20 +109,13 @@ struct records: View {
                     .padding(.bottom, -30)
                 }
             }
-            .navigationBarBackButtonHidden(true)   
-                .navigationBarHidden(true)             }
+            .navigationBarBackButtonHidden(true)
+            .navigationBarHidden(true)
+        }
     }
-       
 }
 
-
-struct Recording: Identifiable {
-    let id: Int
-    let title: String
-    let date: String
-    let duration: String
-}
-
+// كرت التسجيل نفسه اللي كنتِ حاطته
 struct RecordingCard: View {
     @State private var showText = false
 
@@ -127,13 +130,12 @@ struct RecordingCard: View {
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 12) {
-            
 
             HStack {
                 Text(duration)
-                       .foregroundColor(.primary.opacity(0.8))
+                    .foregroundColor(.primary.opacity(0.8))
 
-                   Spacer() // يفصل بين المدة والعنوان
+                Spacer()
 
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(title)
@@ -146,9 +148,7 @@ struct RecordingCard: View {
                         .foregroundColor(.primary.opacity(0.6))
                         .font(.caption)
                         .frame(maxWidth: .infinity, alignment: .trailing)
-
                 }
-               
             }
             .contentShape(Rectangle())
             .onTapGesture { onTap() }
@@ -166,8 +166,6 @@ struct RecordingCard: View {
                     }
                     .font(.caption2)
                     .foregroundColor(.white.opacity(0.6))
-                   
-
 
                     HStack(spacing: 28) {
                         Button {
@@ -176,8 +174,9 @@ struct RecordingCard: View {
                             Image(systemName: "text.bubble")
                         }
                         .sheet(isPresented: $showText) {
-                                ShowText()
-                            }
+                            ShowText()
+                        }
+
                         Image(systemName: "gobackward.15")
                         Image(systemName: "play.circle.fill")
                             .font(.system(size: 42))
@@ -196,7 +195,6 @@ struct RecordingCard: View {
         .background(
             RoundedRectangle(cornerRadius: 25)
                 .fill(.primary.opacity(0.10))
-            
         )
         .animation(.easeInOut, value: isExpanded)
     }
@@ -204,4 +202,6 @@ struct RecordingCard: View {
 
 #Preview {
     records()
+        .environmentObject(RecViewModel())   // 👈 مهم للـ Preview
 }
+

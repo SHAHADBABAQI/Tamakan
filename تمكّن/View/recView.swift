@@ -16,7 +16,11 @@ struct recView: View {
     @EnvironmentObject var recViewModel: RecViewModel
     @StateObject var audioVM = AudioRecordingViewModel()
     @State var isRecording = false
+<<<<<<< HEAD
    
+=======
+
+>>>>>>> main
     
     
     var body: some View {
@@ -38,6 +42,7 @@ struct recView: View {
                 
                 VStack{
                     
+<<<<<<< HEAD
                     VStack(alignment: .leading) {
                         Text(audioVM.currentChunk.isEmpty ? "Say something..." : audioVM.currentChunk)
                             .multilineTextAlignment(.leading)
@@ -53,6 +58,24 @@ struct recView: View {
                         audioVM.stopAutoAdvance()
                     }
 
+=======
+                    VStack(alignment: .leading){
+//                        Text("Hello i'm a student at apple")
+//                            .font(.title)
+//                            .foregroundColor(.gray)
+//                        Text("and it's challenge three")
+//                            .font(.title)
+                        // HERE 👇 YOUR LIVE TRANSCRIPTION
+                        Text(audioVM.finalText.isEmpty ? "Say something..." : audioVM.finalText)
+                            .font(.title)
+                            
+                            .animation(.easeInOut, value: audioVM.finalText)
+                        
+                        Button(action: {
+                                        audioVM.playRecording() // call your function
+                        }) { Text("Play Recording") }
+                    }
+>>>>>>> main
                     
                     ZStack{
                         Circle()
@@ -151,10 +174,21 @@ struct recView: View {
                         Text("Cancel")
                     }
                 }
+<<<<<<< HEAD
 
             }
         }
         .navigationBarBackButtonHidden(true)
+=======
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    Button("add text") {
+//                        // handle add text
+//                    }
+//                }
+            }
+        }
+
+>>>>>>> main
     }
 }
 
@@ -172,34 +206,57 @@ struct recView: View {
 //
 //struct recView: View {
 //    @Environment(\.modelContext) private var context
+<<<<<<< HEAD
 //
+=======
+//    
+>>>>>>> main
 //    @EnvironmentObject var recViewModel: RecViewModel
 //    @StateObject var audioVM = AudioRecordingViewModel()
 //    @State var isRecording = false
 //    @Environment(\.dismiss) private var dismiss
 //
 //
+<<<<<<< HEAD
 //
 //
 //    var body: some View {
 //        NavigationStack {
 //            ZStack {
 //
+=======
+//    
+//    
+//    var body: some View {
+//        NavigationStack {
+//            ZStack {
+//                
+>>>>>>> main
 //                VStack(spacing: 50){
 //                    Spacer()
 //                    // Top image positioned to the top-right and partly out of frame
 //                    Image("effect")
 //                        .alignmentGuide(.leading) { d in d[.trailing] }
 //                        .offset(x: 150, y: -40)
+<<<<<<< HEAD
 //
+=======
+//                    
+>>>>>>> main
 //                    Spacer()
 //                    Image("effect")
 //                }
 //                .frame(maxWidth: .infinity, alignment: .trailing)
 //                .padding()
+<<<<<<< HEAD
 //
 //                VStack{
 //
+=======
+//                
+//                VStack{
+//                    
+>>>>>>> main
 //                    VStack(alignment: .leading){
 ////                        Text("Hello i'm a student at apple")
 ////                            .font(.title)
@@ -209,10 +266,17 @@ struct recView: View {
 //                    //TRANSCIPTED TEXT HERE ⚠️ FRONT END NEED TO BE FIXED
 //                    Text(audioVM.finalText.isEmpty ? "Say something..." : audioVM.finalText)
 //                        .font(.title)
+<<<<<<< HEAD
 //
 //                        .animation(.easeInOut, value: audioVM.finalText)
 //                    }
 //
+=======
+//                        
+//                        .animation(.easeInOut, value: audioVM.finalText)
+//                    }
+//                    
+>>>>>>> main
 //                    ZStack{
 //                        Circle()
 //                            .blur(radius: 10)
@@ -237,17 +301,29 @@ struct recView: View {
 //                            .frame(width: 65, height: 65)
 //                            .foregroundStyle(Color.white)
 //                            .scaleEffect(recViewModel.size1)
+<<<<<<< HEAD
 //
+=======
+//                        
+>>>>>>> main
 //                        Circle()
 //                            .blur(radius: 5)
 //                            .frame(width: 50, height: 50)
 //                            .foregroundStyle(Color.black)
 //                            .scaleEffect(recViewModel.size)
+<<<<<<< HEAD
 //
 //                        Circle()
 //                            .frame(width: 50 , height: 50 )
 //                            .foregroundStyle(Color.black)
 //
+=======
+//                        
+//                        Circle()
+//                            .frame(width: 50 , height: 50 )
+//                            .foregroundStyle(Color.black)
+//                        
+>>>>>>> main
 //                        Button {
 //                            if isRecording {
 //                                // 🔴 إيقاف التسجيل
@@ -279,22 +355,38 @@ struct recView: View {
 //                                .frame(width: 60, height: 60)
 //                                .padding()
 //                        }
+<<<<<<< HEAD
 //
+=======
+//                        
+>>>>>>> main
 //                    }
 //                    .frame(width: 200, height: 200) // fixed layout footprint for animated stack
 //                    // Place this ZStack just above the time label with a tight gap
 //                    .offset(x: 0, y: 60)
 //                    .padding(.bottom, 8)
+<<<<<<< HEAD
 //
+=======
+//                    
+>>>>>>> main
 //                    let hours = Int(recViewModel.time) / 3600
 //                    let minutes = (Int(recViewModel.time) % 3600) / 60
 //                    let seconds = Int(recViewModel.time) % 60
 //                    let milliseconds = Int((recViewModel.time.truncatingRemainder(dividingBy: 1)) * 100)
+<<<<<<< HEAD
 //
 //                    Text(String(format : "%02d:%02d:%02d.%02d", hours, minutes, seconds, milliseconds, recViewModel.time))
 //                        .offset(x: 0, y: 55)
 //                        .monospacedDigit()
 //
+=======
+//                    
+//                    Text(String(format : "%02d:%02d:%02d.%02d", hours, minutes, seconds, milliseconds, recViewModel.time))
+//                        .offset(x: 0, y: 55)
+//                        .monospacedDigit()
+//                    
+>>>>>>> main
 //                    ZStack{
 //                        Text("Take a Breath")
 //                            .bold()
@@ -302,9 +394,15 @@ struct recView: View {
 //                            .frame(minWidth: 350, minHeight: 180, alignment: .topLeading)
 //                            .glassEffect(.clear, in: .rect(cornerRadius: 35))
 //                            .offset(x: 0, y: 80)
+<<<<<<< HEAD
 //
 //                        Button("Skip") {
 //
+=======
+//                        
+//                        Button("Skip") {
+//                            
+>>>>>>> main
 //                        }
 //                        .buttonStyle(.glass)
 //                        .offset(x: 125, y: 130)
@@ -326,7 +424,11 @@ struct recView: View {
 //                }
 //
 //                }
+<<<<<<< HEAD
 //            .navigationBarBackButtonHidden(true)
+=======
+//            .navigationBarBackButtonHidden(true) 
+>>>>>>> main
 //            }
 //        .preferredColorScheme(.dark)
 //

@@ -28,7 +28,7 @@ struct records: View {
 
 
     var body: some View {
-        NavigationStack {
+        NavigationView {
             ZStack {
                 Color(.systemBackground)
                     .ignoresSafeArea()
@@ -116,9 +116,7 @@ struct records: View {
     }
     .navigationBarBackButtonHidden(true)
     .navigationBarHidden(true)
-        }
-        .navigationBarBackButtonHidden(true) 
-        //nav
+        }//nav
 }//view
 
 }//struct

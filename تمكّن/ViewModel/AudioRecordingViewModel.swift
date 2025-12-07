@@ -15,6 +15,7 @@ class AudioRecordingViewModel: ObservableObject {
 
     // MARK: - Published UI variables
     @Published var finalText: String = ""
+<<<<<<< HEAD
     @Published var displayedText: String = ""      // shows 2 lines only
     private var allChunks: [String] = []           // stores every chunk
     private let maxWordsPerLine = 5                // you wanted max 5 words per line
@@ -22,6 +23,9 @@ class AudioRecordingViewModel: ObservableObject {
     @Published var currentChunk: String = ""           // chunk الحالي المعروض
     @Published private var textChunks: [String] = []   // جميع الـ chunks
     private var chunkTimer: Timer?
+=======
+
+>>>>>>> main
     // MARK: - Audio
     private let audioEngine = AVAudioEngine()
     private var audioFile: AVAudioFile?
@@ -148,6 +152,7 @@ class AudioRecordingViewModel: ObservableObject {
             print("❌ Playback error:", error)
         }
     }
+<<<<<<< HEAD
     private func updateDisplayedText() {
         // Combine all chunks into words
         let words = allChunks.joined(separator: " ").split(separator: " ")
@@ -162,6 +167,9 @@ class AudioRecordingViewModel: ObservableObject {
 
         displayedText = lastLines.joined(separator: "\n")
     }
+=======
+
+>>>>>>> main
 
     func updateChunks() {
             textChunks = finalText
@@ -198,14 +206,20 @@ class AudioRecordingViewModel: ObservableObject {
     // MARK: - Transcription
     private func transcribeChunk(at url: URL) {
         Task { [weak self] in
-            guard let self = self, let whisper = self.whisper else { return }
+            guard let self = self, let whisper = self.whisper else {
+                print("⚠️ Whisper model not ready")
+                return
+            }
 
             do {
+                print("⏳ Transcribing chunk...")
+
                 let results = try await whisper.transcribe(audioPath: url.path)
                 let text = results.first?.text ?? ""
 
                 DispatchQueue.main.async {
                     if !text.isEmpty {
+<<<<<<< HEAD
                         // Store chunk
                         self.allChunks.append(text)
 
@@ -214,6 +228,12 @@ class AudioRecordingViewModel: ObservableObject {
 
                         // Update displayed window
                         self.updateDisplayedText()
+=======
+                        self.finalText += text + " "
+                        print("🟢 Transcribed:", text)
+                    } else {
+                        print("⚠️ Empty transcription")
+>>>>>>> main
                     }
                 }
 
@@ -223,7 +243,10 @@ class AudioRecordingViewModel: ObservableObject {
         }
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
     // MARK: - Buffer merge
     private func mergeBuffers(_ buffers: [AVAudioPCMBuffer], format: AVAudioFormat) -> AVAudioPCMBuffer {
         let totalFrames = buffers.reduce(0) { $0 + $1.frameLength }

@@ -147,14 +147,38 @@ class AudioRecordingViewModel: ObservableObject {
 
                 let results = try await whisper.transcribe(audioPath: url.path)
                 let text = results.first?.text ?? ""
+                let raw = results.first?.text ?? ""
 
                 DispatchQueue.main.async {
-                    if !text.isEmpty {
-                        self.finalText += text + " "
-                        print("🟢 Transcribed:", text)
-                    } else {
-                        print("⚠️ Empty transcription")
-                    }
+//                    if !text.isEmpty {
+//                        self.finalText += text + " "
+                        
+                        // 1️⃣ Detect blocking (before cleaning)
+                        if self.detectBlocking(raw) {
+                            print("⛔ BLOCKING DETECTED (silent gap)")
+                        }
+                        // 2️⃣ Detect stutter comments (before cleaning)
+                        if self.detectStutterComment(raw) {
+                            print("🟥 STUTTER DETECTED (metadata) →", raw)
+                        }
+
+                        // 2️⃣ Clean text from Whisper metadata
+                        let cleaned = self.removeWhisperMetadata(from: raw)
+
+                        // 3️⃣ Add only real human speech to UI
+                        if !cleaned.isEmpty {
+                            self.finalText += cleaned + " "
+                        }
+
+                        // 4️⃣ Stutter detection using cleaned version (optional)
+                        if self.analyzeStutter(cleaned) {
+                            print("🟥 Stuttering detected")
+                        }
+                        print("🟢🟢 Transcribed RAW:" , text)
+                        print("🟢 Transcribed:" , cleaned)
+//                    } else {
+//                        print("⚠️ Empty transcription")
+//                    }
                 }
 
             } catch {
@@ -162,6 +186,7 @@ class AudioRecordingViewModel: ObservableObject {
             }
         }
     }
+
 
     // MARK: - Buffer merge
     private func mergeBuffers(_ buffers: [AVAudioPCMBuffer], format: AVAudioFormat) -> AVAudioPCMBuffer {
@@ -230,5 +255,101 @@ class AudioRecordingViewModel: ObservableObject {
         let firstLine = lastWords.prefix(5).joined(separator: " ")
         let secondLine = lastWords.dropFirst(5).joined(separator: " ")
         return [firstLine, secondLine].joined(separator: "\n")
+    }
+    
+    
+    func detectStutterComment(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        let stutterComments = [
+            "[stutter]", "[stutters]", "(stutter)", "(stuttering)",
+            "[s]", "(hissing)", "(humming)", "(hashing)", "(breathing)",
+            "[sh]", "(sh)"
+        ]
+        for comment in stutterComments {
+            if lower.contains(comment) {
+                print("🟥 STUTTER COMMENT DETECTED →", text)
+                return true
+            }
+        }
+        return false
+    }
+    
+    
+    func detectBlocking(_ text: String) -> Bool {
+        let lower = text.lowercased()
+
+        return lower.contains("[blank") ||
+               lower.contains("[silence") ||
+               lower.contains("[no_speech")
+    }
+    
+    // MARK: - Stutter detection in speech patterns (cleaned text)
+    func analyzeStutter(_ rawText: String) -> Bool {
+        let t = rawText.lowercased()
+
+        // Clean text for regex detection
+        let text = t
+            .replacingOccurrences(of: "\\.+", with: " ", options: .regularExpression)
+            .replacingOccurrences(of: "[^a-z0-9\\s-]", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+
+        // Regex patterns to detect stuttering
+        // 1️⃣ Repeated WORDS: talk talk talk
+        let repeatedWord       = #"\b(\w+)(?:\s+\1){1,}\b"#           // same as before
+
+        // 2️⃣ Repeated SYLLABLES: ta ta, com com (2-6 letters)
+        let repeatedSyllable   = #"\b([a-z]{1,6})\s+\1\b"#
+
+        // 3️⃣ Long repeated letters (e.g., sss, shhh, shhhh, mmmm)
+//        let longRepeat         = #"(?:^|\s)([a-z]{1,4})\1{1,}(?:\s|$)"#
+        let longRepeat = #"(?:^|\s)([a-z]{1,4})\1+(?:\s|$)"#
+        // Explanation:
+        // [a-z]{1,4} → matches 1 to 4 letters as a group
+        // \1{1,} → repeated at least once (so total 2+ times)
+        // This detects: shh, shhh, shhhh, etc.
+
+        // 4️⃣ Dash-style repeats: b-b-b, D-D-D-D, B-U-H
+        let dashRepeat         = #"\b([a-z](?:-[a-z]){0,})-+\1(?:-+\1){1,}\b"#
+
+        // 5️⃣ Spaced letters: s s s, t t t, h h h, sh h h
+        let spacedLetters      = #"\b([a-z]{1,2})(?:\s+\1){1,}\b"#
+        // Explanation:
+        // [a-z]{1,2} → matches 1 or 2 letters (like "s" or "sh")
+        // (?:\s+\1){1,} → repeated at least once with space in between
+        // Detects: s s s, sh h h, t t t, etc.
+
+        let patterns = [repeatedWord, repeatedSyllable, longRepeat, dashRepeat, spacedLetters]
+
+        for pattern in patterns {
+            if text.range(of: pattern, options: .regularExpression) != nil {
+                print("🟥 STUTTER DETECTED (pattern) →", rawText)
+                return true
+            }
+        }
+
+        return false
+    }
+
+    // MARK: - Whisper Metadata Cleaner (remove ALL tags)
+    func removeWhisperMetadata(from text: String) -> String {
+        var s = text
+
+        // 1️⃣ Remove ALL bracketed/parenthesis/brace/angle/asterisk metadata
+        let bracketPattern = #"(\[[^\]]*\]|\([^\)]*\)|\{[^\}]*\}|<[^\>]*>|\*[^\*]*\*)"#
+        s = s.replacingOccurrences(of: bracketPattern, with: "", options: .regularExpression)
+
+        // 2️⃣ Remove standalone annotation words
+        let annotations = ["laughs", "laughter", "sigh", "sighs", "sizzling", "breathing", "crosstalk", "noise", "unintelligible", "mumbling"]
+        let wordPattern = "(?i)\\b(?:" + annotations.joined(separator: "|") + ")\\b"
+        s = s.replacingOccurrences(of: wordPattern, with: "", options: .regularExpression)
+
+        // 3️⃣ Remove leftover punctuation
+        s = s.replacingOccurrences(of: "[,.;:!?]+", with: " ", options: .regularExpression)
+
+        // 4️⃣ Collapse multiple whitespaces into single space and trim
+        s = s.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+        s = s.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return s
     }
 }

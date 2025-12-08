@@ -129,25 +129,42 @@ struct recView: View {
                     Text(String(format : "%02d:%02d:%02d.%02d", hours, minutes, seconds, milliseconds, recViewModel.time))
                         .offset(x: 0, y: 55)
                         .monospacedDigit()
-                    if !audioVM.currentComment.isEmpty{
-                        ZStack{
-                            Text(audioVM.currentComment)
-                                .bold()
-                                .padding()
-                                .frame(minWidth: 350, minHeight: 180, alignment: .topLeading)
+                    if !audioVM.comments.isEmpty {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 35)
+                                .frame(width: 350, height: 180)
                                 .glassEffect(.clear, in: .rect(cornerRadius: 35))
-                                .offset(x: 0, y: 80)
-                                .animation(.easeInOut, value: audioVM.currentComment)
-                            
-                            Button("Skip") {
-                                audioVM.skipComment()
+                                .offset(y: 80)
+
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    ForEach(audioVM.comments) { comment in
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(comment.type) // Title: type of stutter
+                                                .bold()
+                                                .foregroundColor(.black)
+                                            Text("Word: \(comment.word)")
+                                                .foregroundColor(.white)
+                                            Text("Strategy: \(comment.strategy)")
+                                                .foregroundColor(.white)
+                                                .font(.footnote)
+                                        }
+                                        .padding(.vertical, 4)
+                                        Divider()
+                                            .background(Color.white.opacity(0.5))
+                                    }
+                                }
+                                .padding()
                             }
-                            .buttonStyle(.glass)
-                            .offset(x: 125, y: 130)
+                            .frame(width: 330, height: 170)
+                            .offset(y: 80)
                         }
-                        .transition(.opacity) // optional fade
-                        .animation(.easeInOut, value: audioVM.currentComment)
+                        .transition(.opacity)
+                        .animation(.easeInOut, value: audioVM.comments)
                     }
+
+          
+
                 }
                 .ignoresSafeArea()
             }

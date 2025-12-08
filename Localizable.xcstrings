@@ -31,10 +31,13 @@
     "search..." : {
 
     },
-    "Skip" : {
+    "Speak" : {
 
     },
-    "Speak" : {
+    "Strategy: %@" : {
+
+    },
+    "Word: %@" : {
 
     },
     "إنهاء" : {

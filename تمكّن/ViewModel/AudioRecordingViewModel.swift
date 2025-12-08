@@ -15,7 +15,7 @@ class AudioRecordingViewModel: ObservableObject {
 
     // MARK: - Published UI variables
     @Published var finalText: String = ""
-    @Published var currentComment: String = ""
+    @Published var comments: [StutterComment] = []
 
     // MARK: - Audio
     private let audioEngine = AVAudioEngine()
@@ -29,6 +29,14 @@ class AudioRecordingViewModel: ObservableObject {
     private var whisper: WhisperKit?
 
     var context: ModelContext?
+
+    
+    struct StutterComment: Identifiable, Hashable {
+        let id = UUID()
+        let type: String        // e.g., "مد", "blocking", "repetition"
+        let word: String        // the word that was stuttered or blocked
+        let strategy: String    // optional strategy or note
+    }
 
     // MARK: - Init (load model only once)
     init() {
@@ -171,7 +179,7 @@ class AudioRecordingViewModel: ObservableObject {
                             self.finalText += cleaned + " "
                         }
                        // Generate comment from analysis
-                       self.processNewText(raw)
+                       self.processNewText(cleaned, raw: raw)
 
 
                         // 4️⃣ Stutter detection using cleaned version (optional)
@@ -335,33 +343,48 @@ class AudioRecordingViewModel: ObservableObject {
     }
     
     func commentForAnalysis(_ text: String) -> String {
-           
-           if detectStutterComment(text) {
-               return "مد"
-           }
-           
-           if detectBlocking(text) {
-               return "blocking"
-           }
-           
-           if analyzeStutter(text) {
-               return "repetetion"
-           }
-           
-           return ""
-       }
-    
-    func processNewText(_ text: String) {
-        let comment = commentForAnalysis(text)
-        DispatchQueue.main.async {
-            self.currentComment = comment
-        }
-    }
-    
-    func skipComment() {
-        currentComment = ""   // clears the comment
+        if detectStutterComment(text) { return "مد" }
+        if detectBlocking(text) { return "blocking" }
+        if analyzeStutter(text) { return "repetetion" }
+        return "" // returns empty if no notable comment
     }
 
+    
+    func processNewText(_ text: String, raw: String) {
+        var newComments: [StutterComment] = []
+
+        if detectStutterComment(raw) {
+            newComments.append(StutterComment(type: "مد", word: extractStutterWord(raw), strategy: "Repeat slowly"))
+        }
+
+        if detectBlocking(raw) {
+            newComments.append(StutterComment(type: "blocking", word: extractBlockingWord(raw), strategy: "Pause and relax"))
+        }
+
+        if analyzeStutter(text) {
+            newComments.append(StutterComment(type: "repetition", word: extractRepeatedWord(text), strategy: "Focus on the first syllable"))
+        }
+
+        // Append only if there’s something to show
+        if !newComments.isEmpty {
+            DispatchQueue.main.async {
+                self.comments.append(contentsOf: newComments)
+            }
+        }
+    }
+
+    // Example placeholder functions to extract words from raw text
+    func extractStutterWord(_ raw: String) -> String {
+        return raw // simplify, can refine with regex later
+    }
+    func extractBlockingWord(_ raw: String) -> String {
+        return raw
+    }
+    func extractRepeatedWord(_ text: String) -> String {
+        return text
+    }
+
+    
     
     // MARK: - Whisper Metadata Cleaner (remove ALL tags)
     func removeWhisperMetadata(from text: String) -> String {

@@ -16,8 +16,6 @@ class AudioRecordingViewModel: ObservableObject {
     // MARK: - Published UI variables
     @Published var finalText: String = ""
     @Published var comments: [StutterComment] = []
-    private var currentFileName: String?
-    private var currentFileURL: URL?
 
     // MARK: - Audio
     private let audioEngine = AVAudioEngine()
@@ -70,18 +68,16 @@ class AudioRecordingViewModel: ObservableObject {
         let format = inputNode.inputFormat(forBus: 0)
 
         let timestamp = Date().timeIntervalSince1970
-        currentFileName = "recording_\(timestamp).caf"
-        currentFileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent(currentFileName ?? "no file ")
-        //lastRecordingURL = url
-
+        let fileName = "recording_\(timestamp).caf"
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(fileName)
+        lastRecordingURL = url
 
         addRecord(RcordName: fileName, duration: 0.0, date: Date(), finalText: finalText, url: url)
 
-
         do {
-            audioFile = try AVAudioFile(forWriting: currentFileURL!  , settings: format.settings)
-            print("📁 File created: \(String(describing: currentFileName))")
+            audioFile = try AVAudioFile(forWriting: url, settings: format.settings)
+            print("📁 File created: \(fileName)")
         } catch {
             print("❌ File creation error:", error)
         }
@@ -130,17 +126,16 @@ class AudioRecordingViewModel: ObservableObject {
         audioEngine.stop()
         audioEngine.inputNode.removeTap(onBus: 0)
         print("⏹️ Engine stopped")
-        addRecord(RcordName:  currentFileName!, duration: 0.0, date: Date(), finalText: finalText, url: currentFileURL!, countStuttruingWords : countStuttruingWordsvm)
     }
 
     // MARK: - Play last recording
-    func playRecording(RecordingURL:URL) {
-//        guard let url = RecordingURL else {
-//            print("⚠️ No recording found")
-//            return
-//        }
+    func playRecording() {
+        guard let url = lastRecordingURL else {
+            print("⚠️ No recording found")
+            return
+        }
         do {
-            player = try AVAudioPlayer(contentsOf: RecordingURL)
+            player = try AVAudioPlayer(contentsOf: url)
             player?.play()
             print("🔊 Playing recording")
         } catch {

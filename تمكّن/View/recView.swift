@@ -59,7 +59,9 @@ struct recView: View {
                             .frame(width: 300, alignment: .leading)
                             .animation(.easeInOut, value: audioVM.finalText)
 
-
+                        Button(action: {
+                            audioVM.playRecording()
+                        }) { Text("Play Recording") }
                     }
                     
                     ZStack{

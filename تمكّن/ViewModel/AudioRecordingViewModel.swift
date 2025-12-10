@@ -22,22 +22,21 @@ class AudioRecordingViewModel: ObservableObject {
     private var audioFile: AVAudioFile?
     private var player: AVAudioPlayer?
     private var lastRecordingURL: URL?
-    var countStuttruingWordsvm: Int = 0
+
     private var bufferQueue: [AVAudioPCMBuffer] = []
 
     // MARK: - Whisper model (single instance)
     private var whisper: WhisperKit?
 
     var context: ModelContext?
-    //StutterComment
 
     
-//    struct StutterComment: Identifiable, Hashable {
-//        let id = UUID()
-//        let type: String        // e.g., "مد", "blocking", "repetition"
-//        let word: String        // the word that was stuttered or blocked
-//        let strategy: String    // optional strategy or note
-//    }
+    struct StutterComment: Identifiable, Hashable {
+        let id = UUID()
+        let type: String        // e.g., "مد", "blocking", "repetition"
+        let word: String        // the word that was stuttered or blocked
+        let strategy: String    // optional strategy or note
+    }
 
     // MARK: - Init (load model only once)
     init() {
@@ -74,7 +73,7 @@ class AudioRecordingViewModel: ObservableObject {
             .appendingPathComponent(fileName)
         lastRecordingURL = url
 
-        addRecord(RcordName: fileName, duration: 0.0, date: Date(), finalText: finalText, url: url, countStuttruingWords : countStuttruingWordsvm)
+        addRecord(RcordName: fileName, duration: 0.0, date: Date(), finalText: finalText, url: url)
 
         do {
             audioFile = try AVAudioFile(forWriting: url, settings: format.settings)
@@ -186,8 +185,6 @@ class AudioRecordingViewModel: ObservableObject {
                         // 4️⃣ Stutter detection using cleaned version (optional)
                         if self.analyzeStutter(cleaned) {
                             print("🟥 Stuttering detected")
-                            self.countStuttruingWordsvm += 1
-                            print("🟥🟥 countStuttruingWordsvm" , self.countStuttruingWordsvm)
                         }
                         print("🟢🟢 Transcribed RAW:" , text)
                         print("🟢 Transcribed:" , cleaned)
@@ -201,6 +198,8 @@ class AudioRecordingViewModel: ObservableObject {
             }
         }
     }
+
+
     // MARK: - Buffer merge
     private func mergeBuffers(_ buffers: [AVAudioPCMBuffer], format: AVAudioFormat) -> AVAudioPCMBuffer {
         let totalFrames = buffers.reduce(0) { $0 + $1.frameLength }
@@ -240,7 +239,7 @@ class AudioRecordingViewModel: ObservableObject {
     }
 
     // MARK: - Save new record
-    func addRecord(RcordName: String, duration: Double, date: Date, finalText: String, url: URL , countStuttruingWords :Int) {
+    func addRecord(RcordName: String, duration: Double, date: Date, finalText: String, url: URL) {
 
         guard let context else {
             print("❌ ERROR: No ModelContext found.")
@@ -252,8 +251,7 @@ class AudioRecordingViewModel: ObservableObject {
             duration: duration,
             date: date,
             transcript: finalText,
-            audiofile: url,
-            countStuttringWords : countStuttruingWords
+            audiofile: url
         )
 
         context.insert(newRecord)

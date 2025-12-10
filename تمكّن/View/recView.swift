@@ -15,6 +15,7 @@ struct recView: View {
     @StateObject var audioVM = AudioRecordingViewModel()
     @State var isRecording = false
     
+    
     func formatText(_ text: String) -> String {
         let words = text.split(separator: " ")
         var lines: [String] = []
@@ -125,7 +126,6 @@ struct recView: View {
                     let minutes = (Int(recViewModel.time) % 3600) / 60
                     let seconds = Int(recViewModel.time) % 60
                     let milliseconds = Int((recViewModel.time.truncatingRemainder(dividingBy: 1)) * 100)
-                    
                     Text(String(format : "%02d:%02d:%02d.%02d", hours, minutes, seconds, milliseconds, recViewModel.time))
                         .offset(x: 0, y: 55)
                         .monospacedDigit()

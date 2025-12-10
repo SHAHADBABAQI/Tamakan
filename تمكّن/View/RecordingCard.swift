@@ -5,13 +5,16 @@
 //  Created by nouransalah on 13/06/1447 AH.
 //
 import SwiftUI
+
 struct RecordingCardView: View {
+    @StateObject var audioVM = AudioRecordingViewModel()
     let id: UUID
     let title: String
     let date: Date
     let duration: Double
     @Binding var progress: Double
     var isExpanded: Bool
+    var recordURL: URL
     let onTap: () -> Void
 
     var body: some View {
@@ -57,8 +60,13 @@ struct RecordingCardView: View {
                     HStack(spacing: 28) {
                         Image(systemName: "text.bubble")
                         Image(systemName: "gobackward.15")
-                        Image(systemName: "play.circle.fill")
-                            .font(.system(size: 42))
+                        Button(action: { audioVM.playRecording(RecordingURL :recordURL )}) {
+                            
+                            Image(systemName: "play.circle.fill")
+                                .font(.system(size: 42))
+                        }
+
+                        
                         Image(systemName: "goforward.15")
                         Image(systemName: "trash")
                     }

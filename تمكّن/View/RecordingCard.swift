@@ -11,8 +11,10 @@ struct RecordingCardView: View {
     let date: Date
     let duration: Double
     @Binding var progress: Double
+    let fileURL: URL
     var isExpanded: Bool
     let onTap: () -> Void
+    let onPlay: (URL) -> Void
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 12) {
@@ -57,8 +59,12 @@ struct RecordingCardView: View {
                     HStack(spacing: 28) {
                         Image(systemName: "text.bubble")
                         Image(systemName: "gobackward.15")
-                        Image(systemName: "play.circle.fill")
-                            .font(.system(size: 42))
+                        Button {
+                            onPlay(fileURL)
+                        } label: {
+                            Image(systemName: "play.circle.fill")
+                                .font(.system(size: 42))
+                        }
                         Image(systemName: "goforward.15")
                         Image(systemName: "trash")
                     }

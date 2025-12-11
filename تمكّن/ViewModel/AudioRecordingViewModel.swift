@@ -128,19 +128,30 @@ class AudioRecordingViewModel: ObservableObject {
         print("⏹️ Engine stopped")
     }
 
-    // MARK: - Play last recording
+    // MARK: - Play recording
+    func playRecording(from url: URL) {
+        do {
+            // Ensure playback works after returning to the app
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .default)
+            try session.setActive(true)
+
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.prepareToPlay()
+            player?.play()
+            lastRecordingURL = url
+            print("🔊 Playing recording from \(url.lastPathComponent)")
+        } catch {
+            print("❌ Playback error:", error)
+        }
+    }
+
     func playRecording() {
         guard let url = lastRecordingURL else {
             print("⚠️ No recording found")
             return
         }
-        do {
-            player = try AVAudioPlayer(contentsOf: url)
-            player?.play()
-            print("🔊 Playing recording")
-        } catch {
-            print("❌ Playback error:", error)
-        }
+        playRecording(from: url)
     }
 
     // MARK: - Transcription

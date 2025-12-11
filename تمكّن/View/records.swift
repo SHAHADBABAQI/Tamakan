@@ -24,6 +24,7 @@ struct records: View {
     @State private var expandedID: UUID? = nil
     @Query private var record :[RecordingModel]
     @State var progress: Double = 0.2
+    @StateObject private var audioVM = AudioRecordingViewModel()
     @Environment(\.layoutDirection) var layoutDirection
 
 
@@ -74,11 +75,15 @@ struct records: View {
                                     date: rec.date,
                                     duration: rec.duration,
                                     progress: $progress,
+                                    fileURL: rec.audiofile,
                                     isExpanded: expandedID == rec.id,
                                     onTap: {
                                         withAnimation {
                                             expandedID = (expandedID == rec.id ? nil : rec.id)
                                         }
+                                    },
+                                    onPlay: { url in
+                                        audioVM.playRecording(from: url)
                                     }
                                 )
                             }

@@ -16,14 +16,32 @@ class RecordingModel: Identifiable {
     var date: Date
     var transcript: String
     var audiofile: URL
+    var countStutter: Int = 0
+    var moodRating: Int = 0
+    var emothionText: String = ""
     //i have to intilise all data i can not init some of data
-    init(recordname: String, duration: Double, date: Date, transcript: String, audiofile: URL) {
+    init(recordname: String, duration: Double, date: Date, transcript: String, audiofile: URL , countStutter: Int, moodRating: Int ,
+         emothionText: String) {
         self.id = UUID()
         self.recordname = recordname
         self.duration = duration
         self.date = date
         self.transcript = transcript
         self.audiofile = audiofile
+        self.countStutter = countStutter
+        self.moodRating = moodRating
+        self.emothionText = emothionText
+        
+    }
+    
+    
+    func setMoodRating(MoodRatingf: Int){
+        
+        moodRating = MoodRatingf
+    }
+    func setEmothionText(EmothionTextf: String){
+        
+        emothionText = EmothionTextf
     }
     
     

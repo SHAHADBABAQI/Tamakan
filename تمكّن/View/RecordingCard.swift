@@ -11,26 +11,56 @@ struct RecordingCardView: View {
     let date: Date
     let duration: Double
     @Binding var progress: Double
+    let isActive: Bool
     let fileURL: URL
     var isExpanded: Bool
     let onTap: () -> Void
     let onPlay: (URL) -> Void
+    let onPause: () -> Void
+    let onSeekStart: () -> Void
+    let onSeekEnd: () -> Void
+    let onForward: () -> Void
+    let onBackward: () -> Void
+    let recordingModel : RecordingModel
+    let onDelete: (RecordingModel) -> Void
+    let onRename: (String) -> Void   // 👈 NEW
+    @State var isPlaying = false
+    @State private var showTextSheet = false
+
+    
+    //let summary: (RecordingModel) -> Void
+    
+
 
     var body: some View {
+        
+        
         VStack(alignment: .trailing, spacing: 12) {
 
             // Top part
             HStack {
-                Text("\(duration, specifier: "%.1f")")
+                Text(smartFormatDuration(duration))
                     .foregroundColor(.primary.opacity(0.8))
+
 
                 Spacer()
 
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(title)
+                    if isExpanded {
+                        TextField("Title", text: Binding(
+                            get: { title },
+                            set: { newValue in onRename(newValue) }   // call update
+                        ))
                         .foregroundColor(.primary)
                         .font(.title3)
                         .bold()
+                    } else {
+                        Text(title)
+                            .foregroundColor(.primary)
+                            .font(.title3)
+                            .bold()
+                    }
+
 
                     Text(date.formatted())
                         .foregroundColor(.primary.opacity(0.6))
@@ -44,29 +74,80 @@ struct RecordingCardView: View {
             if isExpanded {
                 VStack(spacing: 12) {
 
-                    Slider(value: $progress)
-                        .tint(.primary)
+                    Slider(
+                        value: $progress,
+                        in: 0...1,
+                        onEditingChanged: { editing in
+                            if editing {
+                                onSeekStart()
+                            } else {
+                                onSeekEnd()
+                            }
+                        }
+                    )
+                    .disabled(!isActive)
 
-                    HStack {
-                        Text("-1:10")
-                        Spacer()
-                        Text("0:00")
-                    }
-                    .font(.caption2)
-                    .foregroundColor(.primary.opacity(0.6))
+
+//                    HStack {
+//                        Text("-1:10")
+//                        Spacer()
+//                        Text("0:00")
+//                    }
+//                    .font(.caption2)
+//                    .foregroundColor(.primary.opacity(0.6))
 
                     // Action buttons
                     HStack(spacing: 28) {
-                        Image(systemName: "text.bubble")
-                        Image(systemName: "gobackward.15")
+                        Button(action: {
+                                showTextSheet = true
+                            }) {
+                                Image(systemName: "text.bubble")
+                                    .font(.title2)
+                            }
+                            .sheet(isPresented: $showTextSheet) {
+                                ShowText(recording: recordingModel)
+                            }
+                     
+                        
+                        
+                        Button(action: onForward) {
+                                Image(systemName: "goforward.10")
+                                    .font(.title2)
+                            }
+                        .disabled(!isActive)
+
+                        
                         Button {
-                            onPlay(fileURL)
+                            if isPlaying {
+                                onPause()
+                            } else {
+                                onPlay(fileURL)
+                            }
+                            isPlaying.toggle()
                         } label: {
-                            Image(systemName: "play.circle.fill")
-                                .font(.system(size: 42))
+                            Image(isPlaying ? "pauseButton" : "playButton")
+                                 .resizable()
+                                 .frame(width: 35, height: 35)
+                                 .font(.system(size: 42))
                         }
-                        Image(systemName: "goforward.15")
-                        Image(systemName: "trash")
+
+
+                        Button(action: onBackward) {
+                                Image(systemName: "gobackward.10")
+                                    .font(.title2)
+                            }
+                        .disabled(!isActive)
+
+                        Button {
+                            
+                            onDelete(recordingModel)
+                        }label:{
+                            Image(systemName: "trash")
+                        }
+                        
+                        
+                        
+                        
                     }
                     .foregroundColor(.primary)
 
@@ -81,6 +162,27 @@ struct RecordingCardView: View {
             RoundedRectangle(cornerRadius: 25)
                 .fill(.primary.opacity(0.10))
         )
+    
         .animation(.easeInOut, value: isExpanded)
     }
+    
+    func smartFormatDuration(_ time: Double) -> String {
+        let hours = Int(time) / 3600
+        let minutes = (Int(time) % 3600) / 60
+        let seconds = Int(time) % 60
+        let milliseconds = Int((time.truncatingRemainder(dividingBy: 1)) * 100)
+
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        }
+        if minutes > 0 {
+            return String(format: "%d:%02d", minutes, seconds)
+        }
+        if time < 10 {
+            return String(format: "%01d.%02d", seconds, milliseconds)
+        }
+        return "\(seconds)s"
+    }
+
+
 }

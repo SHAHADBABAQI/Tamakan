@@ -1,3 +1,18 @@
+////////
+////////  records.swift
+////////  تمكّن
+////////
+////////  Created by noura on 01/12/2025.
+////////
+//import SwiftUI
+//import SwiftData
+//
+////
+////  records.swift
+////  تمكّن
+////
+////  Created by noura on 01/12/2025.
+////
 ////
 ////  Untitled.swift
 ////  تمكّن
@@ -22,11 +37,35 @@ import SwiftData
 struct records: View {
     @State private var searchText = ""
     @State private var expandedID: UUID? = nil
-    @Query private var record :[RecordingModel]
-    @State var progress: Double = 0.2
+//    @Query private var record :[RecordingModel]
+    @Query(
+        sort: \RecordingModel.date,
+        order: .reverse
+    ) var record: [RecordingModel]
+
+    private func progressBinding(for recID: UUID) -> Binding<Double> {
+        Binding<Double>(
+            get: {
+                audioVM.currentRecordingID == recID
+                ? audioVM.playbackProgress
+                : 0
+            },
+            set: { newValue in
+                guard audioVM.currentRecordingID == recID else { return }
+                audioVM.playbackProgress = newValue
+                audioVM.seek(to: newValue)
+            }
+        )
+    }
+
+    // Remove duplicate/unused progress properties
+    // @State var progress: Double = 0.2
+    // let progress: Double
+
     @StateObject private var audioVM = AudioRecordingViewModel()
     @Environment(\.layoutDirection) var layoutDirection
-
+    @Environment(\.modelContext) private var modelContext
+    let bottomBarHeight: CGFloat = 200
 
     var body: some View {
         NavigationView {
@@ -36,7 +75,7 @@ struct records: View {
                 VStack {
                     HStack {
                         Image("Image1")
-                            .frame(width: 180, height: 180)
+                            .frame(width: 100, height: 50)
                             .opacity(0.9)
                             .padding(.leading, 10)
                             .padding(.top, 0)
@@ -49,7 +88,7 @@ struct records: View {
                             Spacer()
 
                             Text("Records")
-                                .font(.system(size: 32, weight: .bold))
+                                .font(.title.weight(.bold))
                                 .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity,
                                        alignment: layoutDirection == .rightToLeft ? .trailing : .leading)
@@ -57,6 +96,7 @@ struct records: View {
 
                             TextField("search...", text: $searchText)
                                 .padding(12)
+                                .font(.body)
                                 .foregroundColor(.primary)
                                 .background(.primary.opacity(0.08))
                                 .cornerRadius(14)
@@ -69,29 +109,128 @@ struct records: View {
                             
                             
                             ForEach(record) { rec in
+//                                RecordingCardView(
+//                                    id: rec.id,
+//                                    title: rec.recordname,
+//                                    date: rec.date,
+//                                    duration: rec.duration,
+//                                    progress: (audioVM.currentRecordingID == rec.id ? audioVM.playbackProgress : 0),
+//                                    fileURL: rec.audiofile,
+//                                    isExpanded: expandedID == rec.id,
+//                                    onTap: {
+//                                        withAnimation {
+//                                            expandedID = (expandedID == rec.id ? nil : rec.id)
+//                                        }
+//                                    },
+//                                    
+//                                    onPlay: { url in
+//                                        audioVM.playRecording(from: url, recordingID: rec.id)
+//                                    },
+//                                    onPause: {
+//                                        audioVM.pauseRecording()
+//                                    },
+//                                    recordingModel: rec
+//                                    ,
+//                                    onDelete:{ recordingModel in
+//                                        withAnimation(.easeInOut(duration: 0.3)) {
+//                                            // Collapse the card if it's expanded
+//                                            if expandedID == recordingModel.id {
+//                                                expandedID = nil
+//                                            }
+//                                            // Delete the recording
+//                                            audioVM.deletRecording(recordObject: recordingModel)
+//                                        }
+//                                    }, onRename: { newName in
+//                                        audioVM.renameRecording(rec, to: newName)
+//                                    }
+//                                    //summary: {}
+//                                
+//                                
+//                                )
+                                
                                 RecordingCardView(
                                     id: rec.id,
                                     title: rec.recordname,
                                     date: rec.date,
                                     duration: rec.duration,
-                                    progress: $progress,
+
+//                                    progress: Binding(
+//                                        get: {
+//                                            audioVM.currentRecordingID == rec.id
+//                                            ? audioVM.playbackProgress
+//                                            : 0
+//                                        },
+//                                        set: { newValue in
+//                                            guard audioVM.currentRecordingID == rec.id else { return }
+//                                            audioVM.playbackProgress = newValue
+//                                            audioVM.seek(to: newValue)
+//                                        }
+//                                    )
+                                    
+                                    progress: progressBinding(for: rec.id), isActive: true,
+                                    
+
                                     fileURL: rec.audiofile,
                                     isExpanded: expandedID == rec.id,
+
                                     onTap: {
                                         withAnimation {
                                             expandedID = (expandedID == rec.id ? nil : rec.id)
                                         }
                                     },
+
                                     onPlay: { url in
-                                        audioVM.playRecording(from: url)
+                                        audioVM.playRecording(from: url, recordingID: rec.id)
+                                    },
+
+                                    onPause: {
+                                        audioVM.pauseRecording()
+                                    },
+
+                                    onSeekStart: {
+                                        audioVM.isUserSeeking = true
+                                    },
+
+                                    onSeekEnd: {
+                                        audioVM.isUserSeeking = false
+                                    },
+
+                                    onForward: {
+                                        guard audioVM.currentRecordingID == rec.id else { return }
+                                        audioVM.forward()
+                                    },
+
+                                    onBackward: {
+                                        guard audioVM.currentRecordingID == rec.id else { return }
+                                        audioVM.backward()
+                                    },
+
+                                    recordingModel: rec,
+
+                                    onDelete: { recordingModel in
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            if expandedID == recordingModel.id {
+                                                expandedID = nil
+                                            }
+                                            audioVM.deletRecording(recordObject: recordingModel)
+                                        }
+                                    },
+
+                                    onRename: { newName in
+                                        audioVM.renameRecording(rec, to: newName)
                                     }
                                 )
+
+                                .transition(.move(edge: .trailing).combined(with: .opacity))
                             }
+                            .animation(.easeInOut(duration: 0.3), value: record.count)
                             
                             }
+                .padding(.bottom, bottomBarHeight) // 👈 WALL
                 .padding(.horizontal, 16)
-                .padding(.bottom, 40)
+//                .padding(.bottom, 40)
             }
+                    .clipped()
         }
         
         VStack {
@@ -119,10 +258,18 @@ struct records: View {
             }
             .padding(.bottom, -30)
         }
+        
     }
+    .ignoresSafeArea(.keyboard)
     .navigationBarBackButtonHidden(true)
     .navigationBarHidden(true)
-        }//nav
+    .onAppear {
+        audioVM.context = modelContext
+    }
+        }
+        
+        .navigationBarBackButtonHidden(true)
+        //nav
 }//view
 
 }//struct
@@ -135,170 +282,6 @@ struct SecondView: View {
             .foregroundColor(.black)
     }
 }
-//
-
-
-
-    
-    
-//
-//func RecordingCardView(
-//
-//
-//    id: UUID,
-//    title: String,
-//    date: Date,
-//    duration: Double,
-//    isExpanded: Bool,
-//    prograss: Binding<Double>,
-//    onTap: @escaping () -> Void
-//) -> some View {
-//
-//
-//
-//    return VStack(alignment: .trailing, spacing: 12) {
-//
-//        HStack {
-//            Text("\(duration)")
-//                .foregroundColor(.primary.opacity(0.8))
-//
-//            Spacer()
-//
-//            VStack(alignment: .trailing, spacing: 4) {
-//                Text(title)
-//                    .foregroundColor(.primary)
-//                    .font(.title3)
-//                    .bold()
-//                    .frame(maxWidth: .infinity, alignment: .trailing)
-//
-//                Text("\(date)")
-//                    .foregroundColor(.primary.opacity(0.6))
-//                    .font(.caption)
-//                    .frame(maxWidth: .infinity, alignment: .trailing)
-//            }
-//        }
-//        .contentShape(Rectangle())
-//        .onTapGesture { onTap() }
-//
-//        if isExpanded {
-//            VStack(spacing: 12) {
-//
-//                Slider(value: prograss)
-//                    .tint(.primary)
-//                    .padding(.horizontal, 4)
-//
-//                HStack {
-//                    Text("-1:10")
-//                    Spacer()
-//                    Text("0:00")
-//                }
-//                .font(.caption2)
-//                .foregroundColor(.white.opacity(0.6))
-//
-//                HStack(spacing: 28) {
-//                    Image(systemName: "text.bubble")
-//                    Image(systemName: "gobackward.15")
-//                    Image(systemName: "play.circle.fill")
-//                        .font(.system(size: 42))
-//                    Image(systemName: "goforward.15")
-//                    Image(systemName: "trash")
-//                }
-//                .foregroundColor(.primary)
-//                .padding(.top, 4)
-//
-//            }
-//            .transition(.move(edge: .bottom).combined(with: .opacity))
-//        }
-//
-//    }
-//    .padding()
-//    .frame(maxWidth: .infinity)
-//    .frame(minHeight: isExpanded ? 200 : 80)
-//    .background(
-//        RoundedRectangle(cornerRadius: 25)
-//            .fill(.primary.opacity(0.10))
-//    )
-//    .animation(.easeInOut, value: isExpanded)
-//}
-//struct RecordingCard: View {
-//    let id: Int
-//    var title: String
-//    var date: String
-//    var duration: String
-//    var isExpanded: Bool
-//    var onTap: () -> Void
-//
-//    @State private var progress: Double = 0.2
-//
-//    var body: some View {
-//        VStack(alignment: .trailing, spacing: 12) {
-//
-//
-//            HStack {
-//                Text(duration)
-//                       .foregroundColor(.primary.opacity(0.8))
-//
-//                   Spacer() // يفصل بين المدة والعنوان
-//
-//                VStack(alignment: .trailing, spacing: 4) {
-//                    Text(title)
-//                        .foregroundColor(.primary)
-//                        .font(.title3)
-//                        .bold()
-//                        .frame(maxWidth: .infinity, alignment: .trailing)
-//
-//                    Text(date)
-//                        .foregroundColor(.primary.opacity(0.6))
-//                        .font(.caption)
-//                        .frame(maxWidth: .infinity, alignment: .trailing)
-//
-//                }
-//
-//            }
-//            .contentShape(Rectangle())
-//            .onTapGesture { onTap() }
-//
-//            if isExpanded {
-//                VStack(spacing: 12) {
-//                    Slider(value: $progress)
-//                        .tint(.primary)
-//                        .padding(.horizontal, 4)
-//
-//                    HStack {
-//                        Text("-1:10")
-//                        Spacer()
-//                        Text("0:00")
-//                    }
-//                    .font(.caption2)
-//                    .foregroundColor(.white.opacity(0.6))
-//
-//
-//
-//                    HStack(spacing: 28) {
-//                        Image(systemName: "text.bubble")
-//                        Image(systemName: "gobackward.15")
-//                        Image(systemName: "play.circle.fill")
-//                            .font(.system(size: 42))
-//                        Image(systemName: "goforward.15")
-//                        Image(systemName: "trash")
-//                    }
-//                    .foregroundColor(.primary)
-//                    .padding(.top, 4)
-//                }
-//                .transition(.move(edge: .bottom).combined(with: .opacity))
-//            }
-//        }
-//        .padding()
-//        .frame(maxWidth: .infinity)
-//        .frame(minHeight: isExpanded ? 200 : 80)
-//        .background(
-//            RoundedRectangle(cornerRadius: 25)
-//                .fill(.primary.opacity(0.10))
-//
-//        )
-//        .animation(.easeInOut, value: isExpanded)
-//    }
-//}
 
 #Preview {
     records()

@@ -85,6 +85,7 @@ struct RecordingCardView: View {
                             }
                         }
                     )
+                    .tint(.white)
                     .disabled(!isActive)
 
 
@@ -108,10 +109,8 @@ struct RecordingCardView: View {
                                 ShowText(recording: recordingModel)
                             }
                      
-                        
-                        
-                        Button(action: onForward) {
-                                Image(systemName: "goforward.10")
+                        Button(action: onBackward) {
+                                Image(systemName: "gobackward.10")
                                     .font(.title2)
                             }
                         .disabled(!isActive)
@@ -132,12 +131,12 @@ struct RecordingCardView: View {
                         }
 
 
-                        Button(action: onBackward) {
-                                Image(systemName: "gobackward.10")
+                        Button(action: onForward) {
+                                Image(systemName: "goforward.10")
                                     .font(.title2)
                             }
                         .disabled(!isActive)
-
+                        
                         Button {
                             
                             onDelete(recordingModel)

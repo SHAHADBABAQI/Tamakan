@@ -4,25 +4,25 @@
     "" : {
 
     },
-    "-1:10" : {
+    "%lld stutters" : {
 
     },
-    "%.1f" : {
-
-    },
-    "0:00" : {
+    "Done" : {
 
     },
     "Get Started" : {
 
     },
+    "I'm Feeling..." : {
+
+    },
     "Improve" : {
 
     },
-    "Play Recording" : {
+    "Practice" : {
 
     },
-    "Practice" : {
+    "Preparing Tamakkan..." : {
 
     },
     "Records" : {
@@ -37,10 +37,16 @@
     "Strategy: %@" : {
 
     },
+    "Summary" : {
+
+    },
+    "Title" : {
+
+    },
     "Word: %@" : {
 
     },
-    "إنهاء" : {
+    "Write how you're feeling... (optional)" : {
 
     },
     "التسجيلات" : {
@@ -64,9 +70,6 @@
           }
         }
       }
-    },
-    "اليوم" : {
-
     },
     "بحث…" : {
       "extractionState" : "manual",
